@@ -22,3 +22,5 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 enigma_machine-*.tar
 
+# VS Code Elixir plugin
+.elixir_ls/
