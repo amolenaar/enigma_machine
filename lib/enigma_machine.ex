@@ -13,6 +13,11 @@ defmodule EnigmaMachine do
 
   def ukw(:b), do: 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
 
+  def rotate(offsets, rotors) do
+    offsets
+    |> fn [h | t] -> [h + 1 | t] end.()
+    |> reverse()
+  end
 
   def encode_char(input, {rotor, offset}) do
     Enum.at(rotor, input - ?A + offset |> Integer.mod(Enum.count(rotor)))

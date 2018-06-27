@@ -16,7 +16,7 @@ defmodule EnigmaMachineTest do
   end
 
   test "rotor rotation" do
-
+    rotate([0, 0, 0], [rotor(3), rotor(2), rotor(1)]) == [0, 0, 1]
   end
 
   test "encode wone char with default settings" do
