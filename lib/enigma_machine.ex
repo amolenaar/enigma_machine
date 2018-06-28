@@ -5,39 +5,68 @@ defmodule EnigmaMachine do
 
   import Enum
 
-  @alphabet 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  @alphabet_size 26
+  @alphabet              'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-  def rotor(1), do: {'EKMFLGDQVZNTOWYHXUSPAIBRCJ', ?Q}
-  def rotor(2), do: {'AJDKSIRUXBLHWTMCQGZNPYFVOE', ?E}
-  def rotor(3), do: {'BDFHJLCPRTXVZNYEIWGAKMUSQO', ?V}
+  @doc """
+  A rotor is returned as a list of outout wires on the right side of the rotor.
+  And an offset for the notch (0 based, because: offset, not a position).
+  """
+  def rotor(1), do:     {'EKMFLGDQVZNTOWYHXUSPAIBRCJ', ?Q - ?A}
+  def rotor(2), do:     {'AJDKSIRUXBLHWTMCQGZNPYFVOE', ?E - ?A}
+  def rotor(3), do:     {'BDFHJLCPRTXVZNYEIWGAKMUSQO', ?V - ?A}
 
-  def ukw(:b), do: 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
+  def reflector(:b), do: 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
+
+  defp inc(offset),
+    do: (offset + 1) |> Integer.mod(@alphabet_size)
+
+  defp do_rotate([{notch, offset} | t], acc) when notch == offset,
+    do: do_rotate(t, [inc(offset) | acc])
+
+  defp do_rotate([{_notch, offset} | t], acc),
+    do: no_rotate(t, [inc(offset) | acc])
+
+  defp do_rotate([], acc),
+    do: acc
+
+  defp no_rotate([{_notch, offset} | t], acc),
+    do: no_rotate(t, [offset | acc])
+
+  defp no_rotate([], acc),
+    do: acc
 
   def rotate(offsets, rotors) do
-    offsets
-    |> fn [h | t] -> [h + 1 | t] end.()
+    rotors
+    |> map(fn {_c, n} -> n end)
+    |> zip(offsets)
     |> reverse()
+    |> do_rotate([])
   end
 
-  def encode_char(input, {rotor, offset}) do
-    Enum.at(rotor, input - ?A + offset |> Integer.mod(Enum.count(rotor)))
+  def encode_char(input, {contacts, offset}) do
+    Enum.at(contacts, input - ?A + offset
+    |> Integer.mod(Enum.count(contacts))) |> IO.inspect
   end
 
-  def reverse_rotor(rotor) do
-    Enum.zip(rotor, @alphabet)
-    |> Enum.sort
-    |> Enum.map(fn {_a, b} -> b end) |> IO.inspect
+  def reverse_encode_char(input, {contacts, offset}) do
+    (find_index(contacts, fn p -> p == input end) - offset
+    |> Integer.mod(Enum.count(contacts))) + ?A |> IO.inspect
   end
 
-  def reverse_encode(input, {rotor, _notch}, offset) do
-    Enum.at(rotor, input - ?A + offset |> Integer.mod(Enum.count(rotor)))
-  end
+  def encode([input | _text], offsets, [reflector | rotors]) do
+    new_offsets = offsets |> rotate(rotors)
+    contacts_offsets = rotors
+      |> map(fn {c, _n} -> c end)
+      |> zip(new_offsets) |> IO.inspect
 
-  def encode([input | _text], offsets, [ukw | rotors]) do
-    rotor_offsets = zip(rotors, offsets)
-    all_rotors = map(rotor_offsets |> reverse, fn {{r, _n}, o} -> {reverse_rotor(r), o} end) ++ [{ukw, 0}] ++ map(rotor_offsets, fn {{r, _n}, o} -> {r, o} end)
+    signal_path =
+      map(contacts_offsets |> reverse,
+          fn {c, o} -> &reverse_encode_char(&1, {c, o}) end)
+       ++ [&encode_char(&1, {reflector, 0})]
+       ++ map(contacts_offsets, fn {c, o} -> &encode_char(&1, {c, o}) end)
 
-    [all_rotors |> reduce(input, &(encode_char(&2, &1)))]
+    [signal_path |> reduce(input, fn f, i -> f.(i) end)]
   end
 
 end
