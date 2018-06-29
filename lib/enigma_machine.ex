@@ -67,28 +67,28 @@ defmodule EnigmaMachine do
   def encode_left_right(input, {contacts, offset}) do
     c = input + offset |> mod(contacts)
     {out, _} = at(contacts, c)
-    input + out |> mod(contacts) |> IO.inspect
+    input + out |> mod(contacts)
   end
 
   def encode_right_left(input, {contacts, offset}) do
     c = input + offset |> mod(contacts)
     {_, out} = at(contacts, c)
-    input + out |> mod(contacts) |> IO.inspect
+    input + out |> mod(contacts)
   end
 
   def encode([input | _text], offsets, [reflector | rotors]) do
     new_offsets = offsets |> rotate(rotors)
     contacts_offsets = rotors
       |> map(fn {c, _n} -> c end)
-      |> zip(new_offsets) |> IO.inspect
+      |> zip(new_offsets)
 
     signal_path =
       map(contacts_offsets |> reverse,
-          fn {c, o} -> &encode_left_right(&1, {c, o}) end)
+          fn {c, o} -> &encode_right_left(&1, {c, o}) end)
        ++ [&encode_left_right(&1, {reflector, 0})]
-       ++ map(contacts_offsets, fn {c, o} -> &encode_right_left(&1, {c, o}) end)
+       ++ map(contacts_offsets, fn {c, o} -> &encode_left_right(&1, {c, o}) end)
 
-    [signal_path |> reduce(input - ?A, fn f, i -> f.(i) + ?A end)]
+    [(signal_path |> reduce(input - ?A, fn f, i -> f.(i) end)) + ?A]
   end
 
 end
