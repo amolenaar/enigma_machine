@@ -14,26 +14,26 @@ defmodule EnigmaMachineTest do
     assert notch == 16
   end
 
-  # test "encode a character" do
-  #   assert encode_right_left(0, {offsets('BDAC'), 0}) == 1
-  #   assert encode_right_left(0, {offsets('BDAC'), 1}) == 2
-  #   assert encode_right_left(3, {offsets('BDAC'), 1}) == 0
-  #   assert encode_right_left(0, {offsets('BDAC'), 2}) == 2
-  #   assert encode_right_left(2, {offsets('BDAC'), 3}) == 0
-  #   assert encode_right_left(0, {rotor(1) |> contacts(), 0}) == 4
-  #   assert encode_right_left(0, {rotor(1) |> contacts(), 1}) == 9
-  #   assert encode_right_left(20, {rotor(1) |> contacts(), 0}) == 0
-  # end
+  test "encode a character" do
+    assert encode_right_left(0, {offsets('BDAC'), 0}) == 1
+    assert encode_right_left(0, {offsets('BDAC'), 1}) == 2
+    assert encode_right_left(3, {offsets('BDAC'), 1}) == 0
+    assert encode_right_left(0, {offsets('BDAC'), 2}) == 2
+    assert encode_right_left(2, {offsets('BDAC'), 3}) == 0
+    assert encode_right_left(0, {rotor(1) |> contacts(), 0}) == 4
+    assert encode_right_left(0, {rotor(1) |> contacts(), 1}) == 9
+    assert encode_right_left(20, {rotor(1) |> contacts(), 0}) == 0
+  end
 
-  # test "reverse encode a character" do
-  #   assert encode_left_right(1, {offsets('BDAC'), 0}) == 0
-  #   assert encode_left_right(2, {offsets('BDAC'), 1}) == 0
-  #   assert encode_left_right(0, {offsets('BDAC'), 1}) == 3
-  #   assert encode_left_right(2, {offsets('BDAC'), 2}) == 0
-  #   assert encode_left_right(0, {offsets('BDAC'), 3}) == 2
-  #   assert encode_left_right(4, {rotor(1) |> contacts(), 0}) == 0
-  #   assert encode_left_right(0, {rotor(1) |> contacts(), 0}) == 20
-  # end
+  test "reverse encode a character" do
+    assert encode_left_right(1, {offsets('BDAC'), 0}) == 0
+    assert encode_left_right(2, {offsets('BDAC'), 1}) == 0
+    assert encode_left_right(0, {offsets('BDAC'), 1}) == 3
+    assert encode_left_right(2, {offsets('BDAC'), 2}) == 0
+    assert encode_left_right(0, {offsets('BDAC'), 3}) == 2
+    assert encode_left_right(4, {rotor(1) |> contacts(), 0}) == 0
+    assert encode_left_right(0, {rotor(1) |> contacts(), 0}) == 20
+  end
 
   test "rotor rotation" do
     assert rotate([0, 0, 0], [rotor(3), rotor(2), rotor(1)]) == [0, 0, 1]
@@ -63,12 +63,9 @@ defmodule EnigmaMachineTest do
   end
 
   test "encode one char with default settings" do
-    # assert encode('A', [0], [reflector(:b), rotor(1)]) == 'E'
-    # assert encode('A', [1], [reflector(:b), rotor(1)]) == 'M'
     assert encode('H', [0,0,0], [reflector(:b), rotor(3), rotor(2), rotor(1)]) == 'M'
-    # assert encode('HELLOWORLD', [0,0,0], [reflector(:b), rotor(3), rotor(2), rotor(1)]) == 'MFNCZBBFZM'
-    # assert encode('HELLOWORLD', [0,0,0], [ukw(:b), rotor(1), rotor(3), rotor(2)]) == 'ZXVMIZYFEY'
+    assert encode('HELLOWORLD', [0,0,0], [reflector(:b), rotor(3), rotor(2), rotor(1)]) == 'MFNCZBBFZM'
+    assert encode('HELLOWORLD', [0,0,0], [reflector(:b), rotor(1), rotor(3), rotor(2)]) == 'ZXVMIZYFEY'
   end
-
 
 end

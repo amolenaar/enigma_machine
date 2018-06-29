@@ -76,7 +76,9 @@ defmodule EnigmaMachine do
     input + out |> mod(contacts)
   end
 
-  def encode([input | _text], offsets, [reflector | rotors]) do
+  def encode(text, offsets, wheels, acc \\ [])
+
+  def encode([input | text], offsets, [reflector | rotors]=wheels, acc) do
     new_offsets = offsets |> rotate(rotors)
     contacts_offsets = rotors
       |> map(fn {c, _n} -> c end)
@@ -88,7 +90,11 @@ defmodule EnigmaMachine do
        ++ [&encode_left_right(&1, {reflector, 0})]
        ++ map(contacts_offsets, fn {c, o} -> &encode_left_right(&1, {c, o}) end)
 
-    [(signal_path |> reduce(input - ?A, fn f, i -> f.(i) end)) + ?A]
+    new_acc = [(signal_path |> reduce(input - ?A, fn f, i -> f.(i) end)) + ?A | acc]
+    encode(text, new_offsets, wheels, new_acc)
   end
+
+  def encode([], _offsets, _wheels, acc),
+    do: acc |> reverse
 
 end
