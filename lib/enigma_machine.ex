@@ -5,21 +5,41 @@ defmodule EnigmaMachine do
 
   import Enum
 
-  @alphabet_size 26
-  @alphabet              'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  @plaintext_size 26
+  @plaintext 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
   @doc """
   A rotor is returned as a list of outout wires on the right side of the rotor.
   And an offset for the notch (0 based, because: offset, not a position).
+  The contacts are represented in a tuple `{left->right, right<-left}`.
   """
-  def rotor(1), do:     {'EKMFLGDQVZNTOWYHXUSPAIBRCJ', ?Q - ?A}
-  def rotor(2), do:     {'AJDKSIRUXBLHWTMCQGZNPYFVOE', ?E - ?A}
-  def rotor(3), do:     {'BDFHJLCPRTXVZNYEIWGAKMUSQO', ?V - ?A}
+  # The list of positions on the left corresponding to the normal ordered alphabet on the right.
+  #                                      1    1    2    2
+  #                            0    5    0    5    0    5
+  #                            ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  def rotor(1), do: offsets {'EKMFLGDQVZNTOWYHXUSPAIBRCJ', ?Q}
+  def rotor(2), do: offsets  {'AJDKSIRUXBLHWTMCQGZNPYFVOE', ?E}
+  def rotor(3), do: offsets  {'BDFHJLCPRTXVZNYEIWGAKMUSQO', ?V}
 
-  def reflector(:b), do: 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
+  #                                         1    1    2    2
+  #                               0    5    0    5    0    5
+  #                               ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  def reflector(:b), do: offsets 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
+
+  def offsets({contacts, notch}),
+    do: {offsets(contacts), notch - ?A}
+
+  def offsets(contacts) do
+    right_to_left = contacts |> zip(@plaintext) |> map(fn {c, p} -> c - p end)
+    left_to_right = contacts |> zip(right_to_left) |> sort |> map(fn {_c, p} -> -p end)
+    zip(left_to_right, right_to_left)
+  end
+
+  defp mod(i, contacts),
+    do: Integer.mod(i, count(contacts))
 
   defp inc(offset),
-    do: (offset + 1) |> Integer.mod(@alphabet_size)
+    do: (offset + 1) |> mod(@plaintext)
 
   defp do_rotate([{notch, offset} | t], acc) when notch == offset,
     do: do_rotate(t, [inc(offset) | acc])
@@ -44,14 +64,16 @@ defmodule EnigmaMachine do
     |> do_rotate([])
   end
 
-  def encode_char(input, {contacts, offset}) do
-    Enum.at(contacts, input - ?A + offset
-    |> Integer.mod(Enum.count(contacts))) |> IO.inspect
+  def encode_left_right(input, {contacts, offset}) do
+    c = input + offset |> mod(contacts)
+    {out, _} = at(contacts, c)
+    input + out |> mod(contacts) |> IO.inspect
   end
 
-  def reverse_encode_char(input, {contacts, offset}) do
-    (find_index(contacts, fn p -> p == input end) - offset
-    |> Integer.mod(Enum.count(contacts))) + ?A |> IO.inspect
+  def encode_right_left(input, {contacts, offset}) do
+    c = input + offset |> mod(contacts)
+    {_, out} = at(contacts, c)
+    input + out |> mod(contacts) |> IO.inspect
   end
 
   def encode([input | _text], offsets, [reflector | rotors]) do
@@ -62,11 +84,11 @@ defmodule EnigmaMachine do
 
     signal_path =
       map(contacts_offsets |> reverse,
-          fn {c, o} -> &reverse_encode_char(&1, {c, o}) end)
-       ++ [&encode_char(&1, {reflector, 0})]
-       ++ map(contacts_offsets, fn {c, o} -> &encode_char(&1, {c, o}) end)
+          fn {c, o} -> &encode_left_right(&1, {c, o}) end)
+       ++ [&encode_left_right(&1, {reflector, 0})]
+       ++ map(contacts_offsets, fn {c, o} -> &encode_right_left(&1, {c, o}) end)
 
-    [signal_path |> reduce(input, fn f, i -> f.(i) end)]
+    [signal_path |> reduce(input - ?A, fn f, i -> f.(i) + ?A end)]
   end
 
 end
