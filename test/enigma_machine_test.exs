@@ -66,6 +66,7 @@ defmodule EnigmaMachineTest do
     assert encode('H', [0,0,0], [reflector(:b), rotor(3), rotor(2), rotor(1)]) == 'M'
     assert encode('HELLOWORLD', [0,0,0], [reflector(:b), rotor(3), rotor(2), rotor(1)]) == 'MFNCZBBFZM'
     assert encode('HELLOWORLD', [0,0,0], [reflector(:b), rotor(1), rotor(3), rotor(2)]) == 'ZXVMIZYFEY'
+    assert encode("HELLOWORLD", [0,0,0], [reflector(:b), rotor(3), rotor(2), rotor(1)]) == 'MFNCZBBFZM'
   end
 
 end

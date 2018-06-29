@@ -76,9 +76,13 @@ defmodule EnigmaMachine do
     input + out |> mod(contacts)
   end
 
-  def encode(text, offsets, wheels, acc \\ [])
+  def encode(text, offsets, wheels) when is_list(text),
+    do: encode(text, offsets, wheels, [])
 
-  def encode([input | text], offsets, [reflector | rotors]=wheels, acc) do
+  def encode(text, offsets, wheels) when is_binary(text),
+    do: encode(text |> String.to_charlist, offsets, wheels, [])
+
+  defp encode([input | text], offsets, [reflector | rotors]=wheels, acc) do
     new_offsets = offsets |> rotate(rotors)
     contacts_offsets = rotors
       |> map(fn {c, _n} -> c end)
@@ -94,7 +98,7 @@ defmodule EnigmaMachine do
     encode(text, new_offsets, wheels, new_acc)
   end
 
-  def encode([], _offsets, _wheels, acc),
+  defp encode([], _offsets, _wheels, acc),
     do: acc |> reverse
 
 end
