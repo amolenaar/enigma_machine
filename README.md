@@ -1,21 +1,12 @@
-# EnigmaMachine
+# Enigma Machine
 
-**TODO: Add description**
+This is an implementation of an Enigma Machine in Elixir. Details can be found
+in this [excellent description from Kerry
+Buckley](http://kerryb.github.io/enigma/).
 
-## Installation
+To run the tests, simply type
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `enigma_machine` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:enigma_machine, "~> 0.1.0"}
-  ]
-end
+```sh
+mix test
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/enigma_machine](https://hexdocs.pm/enigma_machine).
 
